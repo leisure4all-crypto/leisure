@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>나만의 FITT 운동처방 — ACSM 권고 기반</title>
+<meta name="description" content="ACSM 최신 성인 운동 권고(FITT-VP)를 내 정보로 계산해 보는 대학생용 운동처방 대시보드">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="dash-root">
+<div class="fx">
+  <header class="fx-head" id="top">
+    <h1 class="fx-title">나만의 FITT 운동처방 — ACSM 최신 권고</h1>
+    <p class="fx-take dash-skeleton" id="takeaway">—</p>
+  </header>
+
+  <section class="fx-sec" id="inputs">
+    <div class="fx-card">
+      <div class="fx-actions">
+        <div>
+          <h2 class="fx-h2">1. 내 정보 입력</h2>
+          <p class="fx-sub">값을 바꾸면 아래 처방이 바로 다시 계산됩니다. 안정시 심박수는 아침에 일어나 앉은 상태로 1분간 잰 값을 넣으세요.</p>
+        </div>
+        <button type="button" class="fx-btn fx-reset">기본값으로</button>
+      </div>
+      <div class="fx-form">
+        <label class="fx-field">나이 (세)<input type="number" data-param="age" min="15" max="90" step="1"></label>
+        <label class="fx-field">키 (cm)<input type="number" data-param="height" min="120" max="220" step="0.1"></label>
+        <label class="fx-field">체중 (kg)<input type="number" data-param="weight" min="30" max="200" step="0.1"></label>
+        <label class="fx-field">안정시 심박수 (bpm)<input type="number" data-param="rhr" min="35" max="120" step="1"></label>
+        <label class="fx-field">주당 운동 가능 일수<input type="number" data-param="days" min="1" max="7" step="1"></label>
+        <label class="fx-field">1회 운동 가능 시간 (분)<input type="number" data-param="session" min="15" max="180" step="5"></label>
+        <label class="fx-field">하루 앉아 있는 시간 (시간)<input type="number" data-param="sit" min="0" max="18" step="0.5"></label>
+        <div class="fx-choice" id="choice-act"><span class="fx-choice-l">주로 할 유산소 활동 <em class="fx-hint">— 상자를 눌러 목록을 열고 하나를 선택 (강도별 분류)</em></span>
+          <button type="button" class="fx-pick" aria-expanded="false" aria-controls="act-list"><span class="fx-pick-v">—</span><span class="fx-pick-c" aria-hidden="true">▾</span></button>
+          <div class="fx-pick-list" id="act-list" role="listbox" aria-label="유산소 활동 목록" hidden></div></div>
+        <div class="fx-choice" id="choice-level" role="radiogroup" aria-label="현재 운동 수준" data-choice="level"><span class="fx-choice-l">현재 운동 수준 <em class="fx-hint">— 해당하는 것 하나를 눌러 선택</em></span><div class="fx-opts"></div></div>
+        <div class="fx-choice" id="choice-goal" role="radiogroup" aria-label="운동 목표" data-choice="goal"><span class="fx-choice-l">운동 목표 <em class="fx-hint">— 가장 중요한 목표 하나를 눌러 선택</em></span><div class="fx-opts"></div></div>
+        <div class="fx-checks" role="group" aria-label="운동 전 사전점검">
+          <span class="fx-note">운동 전 사전점검 (ACSM 사전참여 선별)</span>
+          <label class="fx-check"><input type="checkbox" data-param="cond">심장·혈관 질환, 당뇨 등 대사 질환, 신장 질환을 진단받은 적이 있다</label>
+          <label class="fx-check"><input type="checkbox" data-param="symp">운동 중이나 평소에 가슴 통증·압박감, 심한 숨참, 어지러움·실신, 심한 두근거림, 발목 부종 같은 증상이 있다</label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="fx-sec" id="summary" aria-label="요약">
+    <div class="fx-tiles">
+      <div class="fx-tile" id="tile-hr"><span class="fx-tile-l">목표 심박수 (유산소)</span><span class="fx-big dash-skeleton" data-k="hr">—</span><span class="fx-tile-s" data-k="hr-s"></span></div>
+      <div class="fx-tile" id="tile-aero"><span class="fx-tile-l">주간 유산소 (중강도 환산)</span><span class="fx-big dash-skeleton" data-k="aero">—</span><span class="fx-tile-s" data-k="aero-s"></span><div class="fx-meter" data-k="aero-m"></div></div>
+      <div class="fx-tile" id="tile-met"><span class="fx-tile-l">주간 운동량</span><span class="fx-big dash-skeleton" data-k="met">—</span><span class="fx-tile-s" data-k="met-s"></span></div>
+      <div class="fx-tile" id="tile-kcal"><span class="fx-tile-l">주간 예상 소모 열량</span><span class="fx-big dash-skeleton" data-k="kcal">—</span><span class="fx-tile-s" data-k="kcal-s"></span></div>
+      <div class="fx-tile" id="tile-bmi"><span class="fx-tile-l">체질량지수 BMI</span><span class="fx-big dash-skeleton" data-k="bmi">—</span><span class="fx-tile-s" data-k="bmi-s"></span></div>
+      <div class="fx-tile" id="tile-screen"><span class="fx-tile-l">운동 전 점검 결과</span><span class="fx-big dash-skeleton" data-k="scr">—</span><span class="fx-tile-s" data-k="scr-s"></span></div>
+    </div>
+  </section>
+
+  <section class="fx-sec" id="fitt">
+    <div>
+      <h2 class="fx-h2">2. FITT-VP 원리 — ACSM 기준과 나의 처방</h2>
+      <p class="fx-sub">F 빈도 · I 강도 · T 시간 · T 유형 · V 운동량 · P 진행. 각 카드 위쪽은 ACSM 기준, 아래 상자는 입력값으로 계산한 내 처방입니다.</p>
+    </div>
+    <div class="fx-grid">
+      <article class="fx-card fx-fitt" id="fitt-aerobic" data-comp="aerobic">
+        <h3 class="fx-h3"><span class="fx-dot fx-dot-aerobic" aria-hidden="true"></span>유산소 운동 <span class="fx-en">Aerobic</span></h3>
+        <dl class="fx-dl">
+          <div class="fx-row"><dt><b class="fx-letter">F</b>빈도</dt><dd class="dash-skeleton" data-source="fitt" data-where="id=aerobic" data-field="frequency">—</dd></div>
+          <div class="fx-row"><dt><b class="fx-letter">I</b>강도</dt><dd class="dash-skeleton" data-source="fitt" data-where="id=aerobic" data-field="intensity">—</dd></div>
+          <div class="fx-row"><dt><b class="fx-letter">T</b>시간</dt><dd class="dash-skeleton" data-source="fitt" data-where="id=aerobic" data-field="time">—</dd></div>
+          <div class="fx-row"><dt><b class="fx-letter">T</b>유형</dt><dd class="dash-skeleton" data-source="fitt" data-where="id=aerobic" data-field="type">—</dd></div>
+          <div class="fx-row"><dt><b class="fx-letter">V</b>운동량</dt><dd class="dash-skeleton" data-source="fitt" data-where="id=aerobic" data-field="volume">—</dd></div>
+          <div class="fx-row"><dt><b class="fx-letter">P</b>진행</dt><dd class="dash-skeleton" data-source="fitt" data-where="id=aerobic" data-field="progression">—</dd></div>
+        </dl>
+        <div class="fx-my" data-my="aerobic"><div class="fx-my-h">나의 처방</div><div class="fx-my-b dash-skeleton">—</div></div>
+      </article>
+      <article class="fx-card fx-fitt" id="fitt-resistance" data-comp="resistance">
+        <h3 class="fx-h3"><span class="fx-dot fx-dot-resistance" aria-hidden="true"></span>근력 운동 <span class="fx-en">Resistance</span></h3>
+        <dl class="fx-dl">
+          <div class="fx-row"><dt><b class="fx-letter">F</b>빈도</dt><dd class="dash-skeleton" data-source="fitt" data-where="id=resistance" data-field="frequency">—</dd></div>
+          <div class="fx-row"><dt><b class="fx-letter">I</b>강도</dt><dd class="dash-skeleton" data-source="fitt" data-where="id=resistance" data-field="intensity">—</dd></div>
+          <div class="fx-row"><dt><b class="fx-letter">T</b>시간</dt><dd class="dash-skeleton" data-source="fitt" data-where="id=resistance" data-field="time">—</dd></div>
+          <div class="fx-row"><dt><b class="fx-letter">T</b>유형</dt><dd class="dash-skeleton" data-source="fitt" data-where="id=resistance" data-field="type">—</dd></div>
+          <div class="fx-row"><dt><b class="fx-letter">V</b>운동량</dt><dd class="dash-skeleton" data-source="fitt" data-where="id=resistance" data-field="volume">—</dd></div>
+          <div class="fx-row"><dt><b class="fx-letter">P</b>진행</dt><dd class="dash-skeleton" data-source="fitt" data-where="id=resistance" data-field="progression">—</dd></div>
+        </dl>
+        <div class="fx-my" data-my="resistance"><div class="fx-my-h">나의 처방</div><div class="fx-my-b dash-skeleton">—</div></div>
+      </article>
+      <article class="fx-card fx-fitt" id="fitt-flexibility" data-comp="flexibility">
+        <h3 class="fx-h3"><span class="fx-dot fx-dot-flexibility" aria-hidden="true"></span>유연성 운동 <span class="fx-en">Flexibility</span></h3>
+        <dl class="fx-dl">
+          <div class="fx-row"><dt><b class="fx-letter">F</b>빈도</dt><dd class="dash-skeleton" data-source="fitt" data-where="id=flexibility" data-field="frequency">—</dd></div>
+          <div class="fx-row"><dt><b class="fx-letter">I</b>강도</dt><dd class="dash-skeleton" data-source="fitt" data-where="id=flexibility" data-field="intensity">—</dd></div>
+          <div class="fx-row"><dt><b class="fx-letter">T</b>시간</dt><dd class="dash-skeleton" data-source="fitt" data-where="id=flexibility" data-field="time">—</dd></div>
+          <div class="fx-row"><dt><b class="fx-letter">T</b>유형</dt><dd class="dash-skeleton" data-source="fitt" data-where="id=flexibility" data-field="type">—</dd></div>
+          <div class="fx-row"><dt><b class="fx-letter">V</b>운동량</dt><dd class="dash-skeleton" data-source="fitt" data-where="id=flexibility" data-field="volume">—</dd></div>
+          <div class="fx-row"><dt><b class="fx-letter">P</b>진행</dt><dd class="dash-skeleton" data-source="fitt" data-where="id=flexibility" data-field="progression">—</dd></div>
+        </dl>
+        <div class="fx-my" data-my="flexibility"><div class="fx-my-h">나의 처방</div><div class="fx-my-b dash-skeleton">—</div></div>
+      </article>
+      <article class="fx-card fx-fitt" id="fitt-neuromotor" data-comp="neuromotor">
+        <h3 class="fx-h3"><span class="fx-dot fx-dot-neuromotor" aria-hidden="true"></span>신경운동 <span class="fx-en">Neuromotor</span></h3>
+        <dl class="fx-dl">
+          <div class="fx-row"><dt><b class="fx-letter">F</b>빈도</dt><dd class="dash-skeleton" data-source="fitt" data-where="id=neuromotor" data-field="frequency">—</dd></div>
+          <div class="fx-row"><dt><b class="fx-letter">I</b>강도</dt><dd class="dash-skeleton" data-source="fitt" data-where="id=neuromotor" data-field="intensity">—</dd></div>
+          <div class="fx-row"><dt><b class="fx-letter">T</b>시간</dt><dd class="dash-skeleton" data-source="fitt" data-where="id=neuromotor" data-field="time">—</dd></div>
+          <div class="fx-row"><dt><b class="fx-letter">T</b>유형</dt><dd class="dash-skeleton" data-source="fitt" data-where="id=neuromotor" data-field="type">—</dd></div>
+          <div class="fx-row"><dt><b class="fx-letter">V</b>운동량</dt><dd class="dash-skeleton" data-source="fitt" data-where="id=neuromotor" data-field="volume">—</dd></div>
+          <div class="fx-row"><dt><b class="fx-letter">P</b>진행</dt><dd class="dash-skeleton" data-source="fitt" data-where="id=neuromotor" data-field="progression">—</dd></div>
+        </dl>
+        <div class="fx-my" data-my="neuromotor"><div class="fx-my-h">나의 처방</div><div class="fx-my-b dash-skeleton">—</div></div>
+      </article>
+      <article class="fx-card fx-fitt" id="fitt-sedentary" data-comp="sedentary">
+        <h3 class="fx-h3"><span class="fx-dot fx-dot-sedentary" aria-hidden="true"></span>좌식 시간 줄이기 <span class="fx-en">Sedentary</span></h3>
+        <dl class="fx-dl">
+          <div class="fx-row"><dt><b class="fx-letter">F</b>빈도</dt><dd class="dash-skeleton" data-source="fitt" data-where="id=sedentary" data-field="frequency">—</dd></div>
+          <div class="fx-row"><dt><b class="fx-letter">T</b>시간</dt><dd class="dash-skeleton" data-source="fitt" data-where="id=sedentary" data-field="time">—</dd></div>
+          <div class="fx-row"><dt><b class="fx-letter">T</b>유형</dt><dd class="dash-skeleton" data-source="fitt" data-where="id=sedentary" data-field="type">—</dd></div>
+          <div class="fx-row"><dt><b class="fx-letter">V</b>운동량</dt><dd class="dash-skeleton" data-source="fitt" data-where="id=sedentary" data-field="volume">—</dd></div>
+        </dl>
+        <div class="fx-my" data-my="sedentary"><div class="fx-my-h">나의 처방</div><div class="fx-my-b dash-skeleton">—</div></div>
+      </article>
+    </div>
+  </section>
+
+  <section class="fx-sec" id="week">
+    <div class="fx-card">
+      <h2 class="fx-h2">3. 나의 주간 운동 계획 (목표 단계)</h2>
+      <p class="fx-sub" id="week-note">—</p>
+      <div class="fx-legend" id="week-legend"></div>
+      <div class="fx-week" id="week-grid"></div>
+    </div>
+  </section>
+
+  <section class="fx-grid" id="intensity">
+    <div class="fx-card" id="zones-card">
+      <h2 class="fx-h2">4. 나의 심박수 강도 구간</h2>
+      <p class="fx-sub" id="zones-note">카르보넨(HRR) 공식으로 계산한 구간별 심박수입니다. 테두리 상자가 내 목표 구간이에요. 막대에 마우스를 올려 보세요.</p>
+      <div class="fx-chart" id="zones-chart"></div>
+    </div>
+    <div class="fx-card" id="method-card">
+      <h2 class="fx-h2">계산 방법 이해하기</h2>
+      <p class="fx-formula">① 최대심박수 HRmax = <code>208 − 0.7 × 나이</code> (Tanaka 식)<br>
+      ② 여유심박수 HRR = <code>HRmax − 안정시 심박수</code><br>
+      ③ 목표심박수 = <code>HRR × 강도% + 안정시 심박수</code><br>
+      ④ 운동량 MET-분 = <code>MET × 분</code>, 소모열량(kcal/분) = <code>MET × 3.5 × 체중(kg) ÷ 200</code><br>
+      ⑤ 고강도(6 MET 이상) 1분 = 중강도 2분으로 환산</p>
+      <p class="fx-note" id="method-mine">—</p>
+      <p class="fx-note">자각적 운동강도(RPE)는 6–20 Borg 척도 기준입니다. 심박계가 없다면 ‘대화 테스트’로 확인하세요 — 중강도는 대화는 되지만 노래는 어려운 정도입니다.</p>
+    </div>
+  </section>
+
+  <section class="fx-sec" id="activities">
+    <div class="fx-card">
+      <h2 class="fx-h2">5. 활동별 강도와 내 체중 기준 소모 열량</h2>
+      <p class="fx-sub">MET는 성인 신체활동 개요서(Compendium of Physical Activities)의 근사값입니다. 행을 누르면 그 활동이 ‘주로 할 유산소 활동’으로 바뀌어 처방이 다시 계산됩니다.</p>
+      <div class="fx-tablebox">
+        <table class="fx-table" id="act-table">
+          <thead><tr>
+            <th data-field="activity" aria-sort="none"><button type="button" data-sort="activity">활동</button></th>
+            <th data-field="met" class="fx-num" aria-sort="descending"><button type="button" data-sort="met">MET</button></th>
+            <th class="fx-hide-n"><span class="fx-thl">강도</span></th>
+            <th class="fx-num"><span class="fx-thl">30분 소모</span></th>
+            <th class="fx-num fx-hide-n"><span class="fx-thl">주 500 MET-분까지</span></th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="fx-sec" id="updates">
+    <div>
+      <h2 class="fx-h2">6. 최신 업데이트 — 무엇이 바뀌었나</h2>
+      <p class="fx-sub">ACSM 지침서 12판(2025)과 2026년 근력운동 입장문의 핵심을 대학생 눈높이로 정리했습니다.</p>
+    </div>
+    <div class="fx-grid">
+      <article class="fx-card fx-upd" id="update-u1">
+        <h3 class="fx-h4 dash-skeleton" data-source="updates" data-where="id=u1" data-field="title">—</h3>
+        <p class="fx-note dash-skeleton" data-source="updates" data-where="id=u1" data-field="text">—</p>
+      </article>
+      <article class="fx-card fx-upd" id="update-u2">
+        <h3 class="fx-h4 dash-skeleton" data-source="updates" data-where="id=u2" data-field="title">—</h3>
+        <p class="fx-note dash-skeleton" data-source="updates" data-where="id=u2" data-field="text">—</p>
+      </article>
+      <article class="fx-card fx-upd" id="update-u3">
+        <h3 class="fx-h4 dash-skeleton" data-source="updates" data-where="id=u3" data-field="title">—</h3>
+        <p class="fx-note dash-skeleton" data-source="updates" data-where="id=u3" data-field="text">—</p>
+      </article>
+      <article class="fx-card fx-upd" id="update-u4">
+        <h3 class="fx-h4 dash-skeleton" data-source="updates" data-where="id=u4" data-field="title">—</h3>
+        <p class="fx-note dash-skeleton" data-source="updates" data-where="id=u4" data-field="text">—</p>
+      </article>
+      <article class="fx-card fx-upd" id="update-u5">
+        <h3 class="fx-h4 dash-skeleton" data-source="updates" data-where="id=u5" data-field="title">—</h3>
+        <p class="fx-note dash-skeleton" data-source="updates" data-where="id=u5" data-field="text">—</p>
+      </article>
+      <article class="fx-card fx-upd" id="update-u6">
+        <h3 class="fx-h4 dash-skeleton" data-source="updates" data-where="id=u6" data-field="title">—</h3>
+        <p class="fx-note dash-skeleton" data-source="updates" data-where="id=u6" data-field="text">—</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="fx-sec" id="sources-info">
+    <div class="fx-card">
+      <h2 class="fx-h2">참고 자료와 주의</h2>
+      <ol class="fx-src">
+        <li>American College of Sports Medicine. ACSM’s Guidelines for Exercise Testing and Prescription, 12th ed. Wolters Kluwer, 2025.</li>
+        <li>ACSM Position Stand. Resistance Training Prescription for Muscle Function, Hypertrophy, and Physical Performance in Healthy Adults: An Overview of Reviews. Medicine &amp; Science in Sports &amp; Exercise, 2026.</li>
+        <li>WHO Guidelines on Physical Activity and Sedentary Behaviour, 2020 · 보건복지부 「한국인을 위한 신체활동 지침서」.</li>
+        <li>Herrmann SD et al. 2024 Adult Compendium of Physical Activities. Journal of Sport and Health Science, 2024.</li>
+        <li>Tanaka H, Monahan KD, Seals DR. Age-predicted maximal heart rate revisited. JACC, 2001. · BMI 분류: 대한비만학회 기준.</li>
+      </ol>
+      <p class="fx-note">이 대시보드는 수업용 교육 자료이며 의학적 진단을 대신하지 않습니다. 근력운동 부하·세트 범위는 입장문 요지와 일반적인 실천 범위를 요약한 것이므로, 정확한 수치는 원문을 확인하세요. 통증이나 이상 증상이 있으면 운동을 멈추고 전문가와 상담하세요.</p>
+    </div>
+  </section>
+</div>
+</div>
+<script src="d3.min.js"></script>
+<script src="data.js"></script>
+<script src="dash-shim.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
